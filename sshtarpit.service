@@ -1,0 +1,12 @@
+[Unit]
+Description=SSH Tarpit
+Requires=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/sshtarpit
+Restart=always
+RestartSec=30sec
+
+[Install]
+WantedBy=multi-user.target
