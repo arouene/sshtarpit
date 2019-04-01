@@ -14,7 +14,7 @@ func init() {
 
 func main() {
 	// listen on SSH port
-	l, err := net.Listen("tcp", ":2222")
+	l, err := net.Listen("tcp", ":22")
 	if err != nil {
 		log.Fatal(err)
 	}
