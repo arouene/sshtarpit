@@ -1,12 +1,15 @@
 package main
 
 import (
-	"bytes"
+	"fmt"
 	"log"
 	"math/rand"
 	"net"
 	"time"
 )
+
+const SSH_PORT = 22
+const BANNER_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -14,7 +17,7 @@ func init() {
 
 func main() {
 	// listen on SSH port
-	l, err := net.Listen("tcp", ":22")
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", SSH_PORT))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +44,8 @@ func main() {
 			var err error = nil
 			for err == nil {
 				time.Sleep(10 * time.Second)
-				_, err = c.Write(RandBytes())
+				banner := append(RandBytes(), byte(13), byte(10))
+				_, err = c.Write(banner)
 			}
 
 			// signaling disconnection
@@ -52,14 +56,19 @@ func main() {
 
 // RandBytes return 10 to 250 random bytes
 func RandBytes() []byte {
-	var b bytes.Buffer
+	n := rand.Intn(50) + 10
+	buf := make([]byte, n)
 
-	l := rand.Intn(240) + 10
-	for ; l > 0; l-- {
-		b.WriteByte(byte(rand.Int()))
+	_, err := rand.Read(buf)
+	if err != nil {
+		return []byte("X")
 	}
 
-	return b.Bytes()
+	for i, b := range buf {
+		buf[i] = BANNER_CHARSET[int(b)%len(BANNER_CHARSET)]
+	}
+
+	return buf
 }
 
 // Report print a message on connection/disconnection
